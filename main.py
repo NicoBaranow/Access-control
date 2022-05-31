@@ -41,17 +41,20 @@ while True:
     uid = PN532.access() 
     inp = input()
 
-    if uid in profesores:
-        start = timer()
-        iman.value(1)
-        #time.sleep(300)
-        #iman.value(0)
-        if start >= 3000000: #supongo que siempre quedara abierto
+    while inp == "":
+                
+        if uid in profesores:
+            start = timer()
+            
+            while start <= 3000000:
+                iman.value(1)
+                
             iman.value(0)
-    else:
-        print("El tag no está registrado")
-
-    if inp == "1":
+            
+        else:
+            print("El tag no está registrado")
+            
+    while inp == "1":
         print("Apoye un tag para agregar a los tags autorizados")
         if uid != "": #no va a llegar a leer el tag por lo que va a aparecer como que nunca se apoya, tal vez la solucion es no inicializarlo en "" al principio,
                       #lo mismo para el inp
@@ -59,8 +62,8 @@ while True:
             print("Accion completada con exito! los tags autorizados son: " + profesores)
         else:
             print("Error! No se ha encontrado un tag")
-        
-    if inp == "0":
+            
+    while inp == "0":
         print("Apoye un tag para remover de los tags autorizados")
         if uid != "": #no va a llegar a leer el tag por lo que va a aparecer como que nunca se apoya, tal vez la solucion es no inicializarlo en "" al principio,
                       #lo mismo para el inp
@@ -68,3 +71,4 @@ while True:
             print("Accion completada con exito! los tags autorizados son: " + profesores)
         else:
             print("Error! No se ha encontrado un tag")
+
