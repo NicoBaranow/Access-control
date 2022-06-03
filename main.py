@@ -8,7 +8,7 @@ from timeit import default_timer as timer
 
 led = Pin(2,Pin.OUT)
 iman = Pin(15,Pin.OUT)
-but = Pin(4,Pin.OUT)
+but = Pin(4,Pin.IN,Pin.PULL_DOWN)
 profesores = []
 
 iman.value(0)
