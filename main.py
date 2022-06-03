@@ -1,19 +1,19 @@
-from tkinter.tix import InputOnly
-import NFC_PN532 as nfc
+# import NFC_PN532 as nfc
 import PN532
 from machine import Pin
 import time
 import utime 
-from timeit import default_timer as timer
+# from timeit import default_timer as timer
 
 led = Pin(2,Pin.OUT)
-iman = Pin(15,Pin.OUT)
-but = Pin(4,Pin.IN,Pin.PULL_DOWN)
+iman = Pin(12,Pin.OUT)
+but = Pin(33,Pin.IN, Pin.PULL_DOWN)
 profesores = []
 
-iman.value(0)
 intTime = 0
 debTime = 100
+
+iman.value(0)
 
 #Interrupcion apertura desde dentro
 def abrir(Pin):
