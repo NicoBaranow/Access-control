@@ -1,3 +1,4 @@
+
 # @Author: carlosgilgonzalez
 # @Date:   2019-10-15T16:13:47+01:00
 # @Last modified by:   carlosgilgonzalez
@@ -16,6 +17,7 @@ Micropython PN532 NFC/RFID control library (SPI)
 https://github.com/Carglglz/NFC_PN532_SPI
 """
 
+import machine
 import time
 from machine import Pin
 from micropython import const
@@ -232,22 +234,27 @@ class PN532:
         while response[offset] == 0x00:
             offset += 1
             if offset >= len(response):
+                machine.reset()
                 raise RuntimeError(
                     'Response frame preamble does not contain 0x00FF!')
         if response[offset] != 0xFF:
+            machine.reset()
             raise RuntimeError(
                 'Response frame preamble does not contain 0x00FF!')
         offset += 1
         if offset >= len(response):
+            machine.reset()
             raise RuntimeError('Response contains no data!')
         # Check length & length checksum match.
         frame_len = response[offset]
         if (frame_len + response[offset+1]) & 0xFF != 0:
+            machine.reset()
             raise RuntimeError(
                 'Response length checksum did not match length!')
         # Check frame checksum value matches bytes.
         checksum = sum(response[offset+2:offset+2+frame_len+1]) & 0xFF
         if checksum != 0:
+            machine.reset()
             raise RuntimeError(
                 'Response checksum did not match expected value: ', checksum)
         # Return frame data.
@@ -279,6 +286,7 @@ class PN532:
             return None
         # Verify ACK response and wait to be ready for function response.
         if not _ACK == self._read_data(len(_ACK)):
+            machine.reset()
             raise RuntimeError('Did not receive expected ACK from PN532!')
         if not self._wait_ready(timeout):
             if(self.debug):
@@ -290,8 +298,8 @@ class PN532:
             print('DEBUG: call_function response:', [hex(i) for i in response])
         # Check that response is for the called function.
         if not (response[0] == _PN532TOHOST and response[1] == (command+1)):
-            raise RuntimeError('Received unexpected command response!')
-        # Return response data.
+            raise machine.reset()
+        # Return response sdata.
         return response[2:]
 
     def get_firmware_version(self):
@@ -299,9 +307,10 @@ class PN532:
         Ver, Rev, and Support values.
         """
         response = self.call_function(
-            _COMMAND_GETFIRMWAREVERSION, 4, timeout=500)
+            _COMMAND_GETFIRMWAREVERSION, 4, timeout=5000)
         if response is None:
-            raise RuntimeError('Failed to detect the PN532')
+            machine.reset()
+            raise
         return tuple(response)
 
     def SAM_configuration(self):   # pylint: disable=invalid-name
@@ -314,6 +323,8 @@ class PN532:
         # check the command was executed as expected.
         self.call_function(_COMMAND_SAMCONFIGURATION,
                            params=[0x01, 0x14, 0x01])
+        print("PN532 configurado correctamente")
+
 
     def read_passive_target(self, card_baud=_MIFARE_ISO14443A, timeout=1):
         """Wait for a MiFare card to be available and return its UID when found.
@@ -333,8 +344,10 @@ class PN532:
             return None
         # Check only 1 card with up to a 7 byte UID is present.
         if response[0] != 0x01:
+            machine.reset()
             raise RuntimeError('More than one card detected!')
         if response[5] > 7:
+            machine.reset()
             raise RuntimeError('Found card with unexpectedly long UID!')
         # Return UID of card.
         return response[6:6+response[5]]
@@ -406,3 +419,4 @@ class PN532:
             _COMMAND_INDATAEXCHANGE, params=params, response_length=1
         )
         return response[0] == 0x00
+
